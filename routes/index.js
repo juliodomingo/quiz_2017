@@ -34,7 +34,7 @@ router.get('/quizzes/:quizId(\\d+)/play',  quizController.play);
 router.get('/quizzes/:quizId(\\d+)/check', quizController.check);
 
 // Preguntas aleatorias
-router.get('/quizzes/random_play',         quizController.random_play);
+router.get('/quizzes/randomplay',         quizController.randomplay);
 router.get('/quizzes/randomcheck/:quizId(\\d+)',         quizController.randomcheck);
 
 

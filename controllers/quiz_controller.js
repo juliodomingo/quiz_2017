@@ -190,8 +190,8 @@ exports.check = function (req, res, next) {
     });
 };
 
-// GET /quizzes/random_play
-exports.random_play = function (req, res, next) {
+// GET /quizzes/randomplay
+exports.randomplay = function (req, res, next) {
 
     var answer = req.query.answer || "";
     
@@ -212,7 +212,7 @@ exports.random_play = function (req, res, next) {
             }
             req.session.quizzes[random_index] = 0;
 
-            res.render('quizzes/random_play', {
+            res.render('quizzes/randomplay', {
                 quiz: quiz,
                 answer: answer,
                 score: req.session.score
