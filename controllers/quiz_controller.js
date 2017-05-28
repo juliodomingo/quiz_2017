@@ -43,6 +43,8 @@ exports.adminOrAuthorRequired = function(req, res, next){
 
 // GET /quizzes
 exports.index = function (req, res, next) {
+    req.session.quizzes = undefined;
+    req.session.score = undefined;    
 
     var countOptions = {
         where: {}
@@ -221,4 +223,69 @@ exports.check = function (req, res, next) {
         result: result,
         answer: answer
     });
+};
+
+// GET /quizzes/randomplay
+exports.randomplay = function (req, res, next) {
+
+    var answer = req.query.answer || "";
+    
+    req.session.score = req.session.score || 0;
+    
+    models.Quiz.findAll()
+        .then(function (quizzes) {
+            req.session.quizzes = req.session.quizzes || quizzes;
+            var num_quizzes = req.session.quizzes.length;
+            var random_index;
+            var quiz = 0;
+            while (quiz === 0) {
+               random_index = Math.floor(Math.random()*num_quizzes);
+               if (random_index === num_quizzes) {
+               random_index--;
+               }
+               quiz = req.session.quizzes[random_index];
+            }
+            req.session.quizzes[random_index] = 0;
+
+            res.render('quizzes/randomplay', {
+                quiz: quiz,
+                answer: answer,
+                score: req.session.score
+            });
+        })
+        .catch(function (error) {
+            next(error);
+        });    
+}
+
+// GET /quizzes/randomcheck/:quizId
+exports.randomcheck = function (req, res, next) {
+
+    var answer = req.query.answer || "";
+
+    var result = answer.toLowerCase().trim() === req.quiz.answer.toLowerCase().trim();
+    
+    var quizzes = req.session.quizzes;
+
+    if (result) {
+        req.session.score++;
+        var score = req.session.score; 
+    }
+    else{
+        var score = req.session.score;
+        req.session.quizzes = undefined;
+    }
+    if (score === quizzes.length){
+        res.render('quizzes/random_nomore', {
+           score: score
+        });
+    }
+    else {
+        res.render('quizzes/random_result', {
+           quiz: req.quiz,
+           result: result,
+           answer: answer,
+           score: req.session.score
+        });
+    }
 };
