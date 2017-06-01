@@ -1,7 +1,7 @@
 
-
 <ul>
     <% for (var i in tips) { %>
+
         <% var tip = tips[i]; %>
 
         <li>
@@ -11,6 +11,8 @@
 
                 <%= tip.text %>
 
+                <span id="autor"> (by <%= tips_usernames ? tips_usernames[i] : "Anónimo" %>) </span>
+        
             <% } %>
 
             <% if (!tip.accepted &&
@@ -20,7 +22,8 @@
 
             <% } %>
 
-            <% if ((session.user && (session.user.isAdmin || (quizAuthorId && quizAuthorId === session.user.id)))) { %>
+            <% if ((session.user && (session.user.isAdmin || (quizAuthorId && quizAuthorId === session.user.id) || 
+                    (tip.AuthorId && tip.AuthorId === session.user.id)))) { %>
 
                 <a href="/quizzes/<%= quizId %>/tips/<%= tip.id %>?_method=DELETE"><button>Borrar</button></a>
 
@@ -29,3 +32,4 @@
         </li>
     <% } %>
 </ul>
+

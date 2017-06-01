@@ -25,6 +25,9 @@ exports.load = function (req, res, next, userId) {
 // GET /users
 exports.index = function (req, res, next) {
 
+    req.session.quizzes = undefined;
+    req.session.score = undefined;    
+
     models.User.count()
     .then(function (count) {
 
@@ -58,12 +61,18 @@ exports.index = function (req, res, next) {
 // GET /users/:userId
 exports.show = function (req, res, next) {
 
+    req.session.quizzes = undefined;
+    req.session.score = undefined;
+    
     res.render('users/show', {user: req.user});
 };
 
 
 // GET /users/new
 exports.new = function (req, res, next) {
+    
+    req.session.quizzes = undefined;
+    req.session.score = undefined;
 
     var user = {
         username: "",

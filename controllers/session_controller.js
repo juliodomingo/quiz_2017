@@ -117,6 +117,9 @@ var authenticate = function(login, password) {
 
 // GET /session   -- Formulario de login
 exports.new = function(req, res, next) {
+    
+    req.session.quizzes = undefined;
+    req.session.score = undefined;
 
     // Donde ire despues de hacer login:
     var redir = req.query.redir || url.parse(req.headers.referer || "/").path;
@@ -124,6 +127,10 @@ exports.new = function(req, res, next) {
     // No volver aqui mismo (el formulario de login).
     if (redir === '/session') {
         redir = "/";
+    }
+
+    if (redir.includes('/quizzes/randomcheck/')) {
+       redir = '/quizzes/randomplay';
     }
 
     res.render('session/new', { redir: redir });

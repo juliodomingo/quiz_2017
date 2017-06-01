@@ -103,8 +103,32 @@ exports.index = function (req, res, next) {
 
 // GET /quizzes/:quizId
 exports.show = function (req, res, next) {
+    
+    var tips = req.quiz.Tips;      
 
-    res.render('quizzes/show', {quiz: req.quiz});
+    if (tips.length > 0) {
+       req.quiz.tips_usernames = new Array();
+       models.User.findAll()
+       .then(function (autores) {
+          var j = 0;
+          for (j = 0; j < tips.length; j++) {
+             for (var i in autores) {
+                if (autores[i].id === tips[j].AuthorId) {
+                   req.quiz.tips_usernames.push(autores[i].username);
+                   break;
+                }
+             }
+          }
+          res.render('quizzes/show', {
+             quiz: req.quiz,
+          });
+       });
+    }
+    else {
+        res.render('quizzes/show', {
+          quiz: req.quiz,
+       });
+    }
 };
 
 
@@ -203,12 +227,35 @@ exports.destroy = function (req, res, next) {
 exports.play = function (req, res, next) {
 
     var answer = req.query.answer || '';
+    
+    var tips = req.quiz.Tips;      
 
-    res.render('quizzes/play', {
-        quiz: req.quiz,
-        answer: answer
-    });
-};
+    if (tips.length > 0) {
+       req.quiz.tips_usernames = new Array();
+       models.User.findAll()
+       .then(function (autores) {
+          var j = 0;
+          for (j = 0; j < tips.length; j++) {
+             for (var i in autores) {
+                if (autores[i].id === tips[j].AuthorId) {
+                   req.quiz.tips_usernames.push(autores[i].username);
+                   break;
+                }
+             }
+          }
+          res.render('quizzes/play', {
+             quiz: req.quiz,
+             answer: answer
+          });
+       });
+    }
+    else {
+        res.render('quizzes/play', {
+          quiz: req.quiz,
+          answer: answer
+        });
+    }
+};  
 
 
 // GET /quizzes/:quizId/check
@@ -232,26 +279,54 @@ exports.randomplay = function (req, res, next) {
     
     req.session.score = req.session.score || 0;
     
-    models.Quiz.findAll()
+    models.Quiz.findAll({include: [
+            models.Tip,
+            {model: models.User, as: 'Author'}
+        ]})
         .then(function (quizzes) {
             req.session.quizzes = req.session.quizzes || quizzes;
             var num_quizzes = req.session.quizzes.length;
             var random_index;
-            var quiz = 0;
-            while (quiz === 0) {
+            req.quiz = 0;
+            while (req.quiz === 0) {
                random_index = Math.floor(Math.random()*num_quizzes);
                if (random_index === num_quizzes) {
                random_index--;
                }
-               quiz = req.session.quizzes[random_index];
+               req.quiz = req.session.quizzes[random_index];
             }
             req.session.quizzes[random_index] = 0;
+ 
+     
+            var tips = req.quiz.Tips;      
 
-            res.render('quizzes/randomplay', {
-                quiz: quiz,
-                answer: answer,
-                score: req.session.score
-            });
+            if (tips.length > 0) {
+               req.quiz.tips_usernames = new Array();
+               models.User.findAll()
+                  .then(function (autores) {
+                      var j = 0;
+                      for (j = 0; j < tips.length; j++) {
+                          for (var i in autores) {
+                             if (autores[i].id === tips[j].AuthorId) {
+                                 req.quiz.tips_usernames.push(autores[i].username);
+                                 break;
+                             }
+                          }
+                      }
+                      res.render('quizzes/randomplay', {
+                         quiz: req.quiz,
+                         answer: answer,
+                         score: req.session.score
+                      });
+                  });
+            }
+            else {
+               res.render('quizzes/randomplay', {
+                  quiz: req.quiz,
+                  answer: answer,
+                  score: req.session.score
+               });
+            }
         })
         .catch(function (error) {
             next(error);
@@ -274,8 +349,10 @@ exports.randomcheck = function (req, res, next) {
     else{
         var score = req.session.score;
         req.session.quizzes = undefined;
+        req.quiz = undefined;
     }
     if (score === quizzes.length){
+        req.quiz = undefined;
         res.render('quizzes/random_nomore', {
            score: score
         });

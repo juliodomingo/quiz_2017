@@ -97,6 +97,8 @@ router.get('/users/:userId(\\d+)/quizzes', quizController.index);     // ver las
 router.get('/quizzes',
     quizController.index);
 router.get('/quizzes/:quizId(\\d+)',
+    sessionController.loginRequired,
+    quizController.adminOrAuthorRequired,
     quizController.show);
 router.get('/quizzes/new',
     sessionController.loginRequired,
@@ -135,6 +137,7 @@ router.put('/quizzes/:quizId(\\d+)/tips/:tipId(\\d+)/accept',
     tipController.accept);
 router.delete('/quizzes/:quizId(\\d+)/tips/:tipId(\\d+)',
     sessionController.loginRequired,
+    tipController.adminQuizAuthorOrTipAuthorRequired,
     tipController.destroy);
 
 

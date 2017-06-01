@@ -19,12 +19,26 @@ exports.load = function (req, res, next, tipId) {
     });
 };
 
+// MW que permite acciones solamente si al usuario logeado es admin o es el autor del tip.
+exports.adminQuizAuthorOrTipAuthorRequired = function(req, res, next){
+
+    var isAdmin  = req.session.user.isAdmin;
+    var isQuizAuthor = req.quiz.AuthorId === req.session.user.id;
+    var isTipAuthor = req.tip.AuthorId === req.session.user.id;
+
+    if (isAdmin || isQuizAuthor || isTipAuthor) {
+        next();
+    } else {
+        console.log('Operación prohibida: El usuario logeado no es el autor de la pista ni del quiz, ni tampoco un administrador.');
+        res.send(403);
+    }
+};
 
 // GET /quizzes/:quizId/tips/new
 exports.new = function (req, res, next) {
-
+    
     var tip = {
-        text: ""
+        text: "",
     };
 
     res.render('tips/new', {
@@ -37,10 +51,13 @@ exports.new = function (req, res, next) {
 // POST /quizzes/:quizId/tips
 exports.create = function (req, res, next) {
 
+    var authorId = req.session.user && req.session.user.id || 0;
+
     var tip = models.Tip.build(
         {
             text: req.body.text,
-            QuizId: req.quiz.id
+            QuizId: req.quiz.id,
+            AuthorId: authorId
         });
 
     tip.save()
@@ -75,7 +92,7 @@ exports.accept = function (req, res, next) {
     req.tip.save(["accepted"])
     .then(function (tip) {
         req.flash('success', 'Pista aceptada con éxito.');
-        res.redirect('/quizzes/' + req.params.quizId);
+        res.redirect('back');
     })
     .catch(function (error) {
         req.flash('error', 'Error al aceptar una Pista: ' + error.message);
@@ -90,7 +107,7 @@ exports.destroy = function (req, res, next) {
     req.tip.destroy()
     .then(function () {
         req.flash('success', 'Pista eliminada con éxito.');
-        res.redirect('/quizzes/' + req.params.quizId);
+        res.redirect('back');
     })
     .catch(function (error) {
         next(error);

@@ -1,3 +1,8 @@
+
+<div class="right">
+    <small> (by <%= quiz.Author ? quiz.Author.username : "Anómino" %>) </small>
+</div>
+
 <h1>
     Juego Aleatorio:
 </h1>
@@ -18,3 +23,38 @@
         <input type="submit" class="itemNarrow" id="send" value="Comprobar">
     </div>
 </form>
+
+<% if (session.user && quiz.Tips.length > 0) { %>
+
+<h1>
+    Pistas:
+</h1>
+
+<% var tips = quiz.Tips; %>
+<% var tips_usernames = quiz.tips_usernames; %>
+<% var quizId = quiz.id; %>
+<% var quizAuthorId = quiz.AuthorId; %>
+
+<ul>
+    <% for (var i in tips) { %>
+
+        <% var tip = tips[i]; %>
+
+        <li>
+
+            <% if (tip.accepted ||
+                    (session.user && (session.user.isAdmin || (quizAuthorId && quizAuthorId === session.user.id)))) { %>
+
+                <%= tip.text %>
+
+                <span id="autor"> (by <%= tips_usernames ? tips_usernames[i] : "Anónimo" %>) </span>
+        
+            <% } %>
+
+        </li>
+    <% } %>
+</ul>
+
+
+<% } %>
+
