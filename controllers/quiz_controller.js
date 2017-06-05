@@ -295,9 +295,9 @@ exports.randomplay = function (req, res, next) {
                }
                req.quiz = req.session.quizzes[random_index];
             }
-            req.session.quizzes[random_index] = 0;
- 
+            req.session.random_index = random_index;
      
+
             var tips = req.quiz.Tips;      
 
             if (tips.length > 0) {
@@ -320,7 +320,7 @@ exports.randomplay = function (req, res, next) {
                       });
                   });
             }
-            else {
+           else {
                res.render('quizzes/randomplay', {
                   quiz: req.quiz,
                   answer: answer,
@@ -340,6 +340,9 @@ exports.randomcheck = function (req, res, next) {
 
     var result = answer.toLowerCase().trim() === req.quiz.answer.toLowerCase().trim();
     
+    req.session.quizzes[req.session.random_index] = 0;   
+    req.session.random_index = undefined; 
+
     var quizzes = req.session.quizzes;
 
     if (result) {

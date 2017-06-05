@@ -37,24 +37,25 @@
 
 <ul>
     <% for (var i in tips) { %>
-
+       
         <% var tip = tips[i]; %>
+        <% var accepted = tip.accepted; %>
+        <% var isAdmin = session.user && session.user.isAdmin; %>
+        <% var isQuizAuthor = session.user && quizAuthorId && quizAuthorId === session.user.id; %>
+     
 
-        <li>
-
-            <% if (tip.accepted ||
-                    (session.user && (session.user.isAdmin || (quizAuthorId && quizAuthorId === session.user.id)))) { %>
-
+        <% if (accepted || isAdmin || isQuizAuthor) { %>
+            
+           <li>
                 <%= tip.text %>
 
                 <span id="autor"> (by <%= tips_usernames ? tips_usernames[i] : "Anónimo" %>) </span>
-        
-            <% } %>
 
-        </li>
+           </li>
+        <% } %>
+
     <% } %>
 </ul>
-
 
 <% } %>
 
